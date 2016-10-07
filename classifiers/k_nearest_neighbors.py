@@ -1,0 +1,103 @@
+import matplotlib.pyplot as plt
+import numpy as np
+import cmath as math 
+
+class Distancias:
+	def __init__(self, clase, elemento, distancia):
+		self.clase = clase
+		self.elemento = elemento
+		self.distancia = distancia
+	def __cmp__(self, other):
+		if self.distancia < other.distancia:
+			return -1
+		elif self.distancia > other.distancia:
+			return 1
+		else:
+			return 0
+	def __str__(self):
+		return str(self.distancia)
+
+def main(
+	c = [
+		np.array([[1,3,1,2,3],[2,5,5,2,3]]),
+		np.array([[6,6,7,8,8],[4,3,4,4,5]])
+ 	], vector=[4, 5], k = 3):
+	#Colores
+	colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
+	markers = [ '.', ',', 'o',"v", "^", "<", ">", "1",
+				"2", "3", "4", "8", "s", "p", "*", "h",
+				"H", "+", "x", "D", "d", "|", "_", "TICKLEFT", 	
+				"TICKRIGHT", "TICKUP", "TICKDOWN", "CARETLEFT",
+				"CARETRIGHT", "CARETUP", "CARETDOWN"]
+
+	
+	print (vector)
+
+	plt.figure()
+
+	#Numero de columnas
+	N = c[0].shape[1]
+	n_cs = len(c)
+	print n_cs
+	print N
+
+	distances = list()
+	n_class = 0
+	e = 0
+	cont = 0
+
+	figures = list()
+	for matrix in c:
+		cont += 1
+		label_figure =  "Clase "+ str(cont)
+		figures.append(plt.scatter(matrix[0], matrix[1], color=colors[cont], marker=markers[cont], label=label_figure))
+		print ("Matriz ")
+		print (matrix)
+		#Obtener la distacia del vector a cada representante
+		trans = np.transpose(matrix)
+		dif = vector - trans
+		print (dif)
+		cuad = np.matrix(dif) * np.matrix(np.transpose(dif))
+		print (cuad) 
+		diag = cuad.diagonal()
+		print (diag)
+		diag_trans = np.transpose(diag)
+		n_class += 1
+		elem = 0
+		for elto in diag_trans:
+			elem += 1
+			raiz = math.sqrt(elto)
+			elem_distance = Distancias(n_class, elem, raiz.real)
+			distances.append(elem_distance)
+			print (raiz.real)
+
+	print ("Distancias de distancias")
+	for dist_by_class in distances:
+		print (dist_by_class.clase)
+		print (dist_by_class.elemento)
+		print (dist_by_class.distancia)
+
+	print ("Lista ordenada")
+	distances.sort()
+	lista_clases = list(map(lambda distan: distan.clase, distances))
+	probabilitys = list()
+	for dist_by_class in range(1, n_cs+1, 1):
+		probability = lista_clases[:k].count(dist_by_class) / k
+		probabilitys.append(probability)
+
+	max_prob = max(probabilitys)
+	class_num = probabilitys.index(max_prob) + 1
+	print ("El vector pertenece a la clase: " + str(class_num))
+
+
+	#Ploteo de clases y del vector
+	figures.append(plt.scatter(vector[0], vector[1], color='b', marker='*', label="Vector"))
+	plt.title("Grafica " + str(n_cs) + " clases")
+	plt.xlabel("Eje x")
+	plt.ylabel("Eje y")
+	plt.legend(handles=figures, loc=4, fontsize=8)
+	plt.show()
+	return class_num
+
+if __name__ == '__main__':
+	main()
