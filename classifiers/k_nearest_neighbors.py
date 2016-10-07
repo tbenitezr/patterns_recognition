@@ -1,4 +1,5 @@
-import matplotlib.pyplot as plt
+#from __future__ import absolute_import
+#from generic import generic_functions
 import numpy as np
 import cmath as math 
 
@@ -17,31 +18,6 @@ class Distancias:
     def __str__(self):
         return str(self.distancia)
 
-def plot_2d(c, vector, n_cs):  
-    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
-    markers = [ 
-                '.', ',', 'o',"v", "^", "<", ">", "1",
-                "2", "3", "4", "8", "s", "p", "*", "h",
-                "H", "+", "x", "D", "d", "|", "_", "TICKLEFT",  
-                "TICKRIGHT", "TICKUP", "TICKDOWN", "CARETLEFT",
-                "CARETRIGHT", "CARETUP", "CARETDOWN"
-            ]
-     
-    plt.figure()
-    figures = list() 
-    cont = 0
-    for matrix in c:
-        cont += 1
-        label_figure =  "Clase "+ str(cont)
-        figures.append(plt.scatter(matrix[0], matrix[1], color=colors[cont], marker=markers[cont], label=label_figure))
-    
-    figures.append(plt.scatter(vector[0], vector[1], color='b', marker='*', label="Vector"))
-    plt.title("Grafica " + str(n_cs) + " clases")
-    plt.xlabel("Eje x")
-    plt.ylabel("Eje y")
-    plt.legend(handles=figures, loc=4, fontsize=8)
-    plt.show()
-
 def main(
     c = [
         np.array([[1,3,1,2,3],[2,5,5,2,3]]),
@@ -51,10 +27,8 @@ def main(
     print 'vector: {}'.format(vector)
 
     #Numero de columnas
-    N = c[0].shape[1]
-    n_cs = len(c)
-    print n_cs
-    print N
+    N = c[0].shape[1] #Representantes
+    n_cs = len(c) #Clases
 
     distances = list()
     n_class = 0
@@ -86,7 +60,7 @@ def main(
     class_num = probabilitys.index(max_prob) + 1
 
     #Ploteo de clases y del vector
-    plot_2d(c, vector, n_cs)
+    #generic_functions.plot_2d(c, vector, n_cs)
     return class_num
 
 if __name__ == '__main__':
