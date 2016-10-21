@@ -12,7 +12,6 @@ class Frames(Frame):
         Frame.__init__(self, root)
 
     def main(self):
-        # setting up a tkinter canvas with scrollbars
         frame = Frame(root, bd=2, relief=SUNKEN)
         frame.grid_rowconfigure(0, weight=1)
         frame.grid_columnconfigure(0, weight=1)
@@ -28,7 +27,6 @@ class Frames(Frame):
         yscroll.config(command=canvas.yview)
         frame.pack(fill=BOTH, expand=1)
 
-        # adding the image
         File = askopenfilename(
             parent=root, initialdir="C:/", title='Selecciona la imagen'
         )
@@ -40,16 +38,13 @@ class Frames(Frame):
             prix = im.load()
             canvas.create_image(0, 0, image=img, anchor="nw")
             canvas.config(scrollregion=canvas.bbox(ALL))
-            # function to be called when mouse is clicked
             centers = list()
 
             def get_coords(event):
-                # outputting x and y coords to console
                 print (event.x, event.y)
                 centers.append(prix[event.x, event.y])
                 # n_c = input("Num class: ")
                 # for i in range(n_c):
-                # mouseclick event
 
             canvas.bind("<Button 1>", get_coords)
 

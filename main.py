@@ -28,7 +28,7 @@ class Frames(object):
 
         # display the menu
         root.config(menu=menubar)
-        # Menu de clasificadores
+        # Classifiers menu
         classifiers_ = Menu(menubar, tearoff=0)
         classifiers_.add_command(label="Distancia minima", command=self.distan)
         classifiers_.add_command(label="Maxima probabilidad", command=self.proba)
@@ -44,18 +44,24 @@ class Frames(object):
         param_frame = ttk.Frame(root, padding="3 3 12 12")
         param_frame.grid(column=0, row=0, sticky=(N, W, E, S))
 
-        ttk.Label(param_frame, text="Parámetros actuales", font=("Helvetica", 16)).grid(column=1, row=2, sticky=N)
+        ttk.Label(
+            param_frame, text="Parámetros actuales", font=("Helvetica", 16)
+        ).grid(column=1, row=2, sticky=N)
         self.n_class_label = ttk.Label(param_frame, text="Número de clases: ")
         self.n_class_label.grid(column=1, row=3, sticky=W)
         ttk.Label(param_frame, text="Vector: ").grid(column=1, row=4, sticky=W)
-        param_button = ttk.Button(param_frame, text="Cambiar Parámetros", command=self.change_param_frame)
+        param_button = ttk.Button(
+            param_frame, text="Cambiar Parámetros", command=self.change_param_frame
+        )
         param_button.grid(column=1, row=6, sticky=W)
         vector_button = ttk.Button(param_frame, text="Elegir vector")
         vector_button.grid(column=2, row=6, sticky=W)
 
         #self.image = Canvas(self.mainframe, width=200, height=150, borderwidth=1, relief=SUNKEN)
         #self.image.grid(column=0, row=1, sticky=(N, W))
-        ttk.Button(self.mainframe, text="Seleccionar imagen", command=self.provide_img).grid(column=0, row=0, sticky=E)
+        ttk.Button(
+            self.mainframe, text="Seleccionar imagen", command=self.provide_img
+        ).grid(column=0, row=0, sticky=E)
 
         for child in self.mainframe.winfo_children():
             child.grid_configure(padx=2, pady=2)
