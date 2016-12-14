@@ -22,10 +22,6 @@ def main(
     inverses = list()
     vecs_avers = list()
     mahalannobis = list()
-    exps = list()
-    dets = list()
-    probabilitys = list()
-    figures = list()
     cont = 0
 
     for matrix in c:
@@ -51,24 +47,15 @@ def main(
         vecs_avers.append(np.matrix(vector - np.transpose(averages[-1])))
         print ("vector - media %s" % vecs_avers[-1])
         mahalannobis.append(vecs_avers[-1] * inverses[-1] * np.transpose(vecs_avers[-1]))
-        print ("v-m inv v-m %s" % mahalannobis[-1])
-        # Exponentes
-        exps.append(math.exp(-.5 * mahalannobis[-1]))
-        print ("e -1/2 * maha %s " % exps[-1])
-        # Determinantes
-        dets.append(np.linalg.det(covariances[-1]))
-        print ("determinante %s" % dets[-1])
-        # Resultados
-        probabilitys.append((1/(2*math.pi*np.power(dets[-1], .5))) * exps[-1])
-        print ("prob %s" % probabilitys[-1])
 
         del averages[-1]
 
-    for probability in probabilitys:
-        print (probability)
+    print ("Distancias Mahalanobis")
+    for distance in mahalannobis:
+        print (distance)
 
-    max_prob = max(probabilitys)
-    class_num = probabilitys.index(max_prob) + 1
+    min_distance = min(mahalannobis)
+    class_num = mahalannobis.index(min_distance) + 1
     return class_num
 
 

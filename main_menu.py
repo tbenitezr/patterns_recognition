@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-from generic import generic_functions
-from classifiers import k_nearest_neighbors
+# from generic import generic_functions
+from classifiers import minimum_distance, maximum_probability, \
+    mahalanobis_distance, k_nearest_neighbors
+from projects import project
 import numpy as np
 from Tkinter import *
 import ttk
@@ -10,58 +12,63 @@ from tkFileDialog import askopenfilename
 import Image, ImageTk
 
 
-class Frames(object):
+class Frames(Frame):
 
     def __init__(self, root):
-        Frame.__init__(self, root)
+        Frame.__init__(self)
+        self.root = root
         self.mainframe = ttk.Frame(root, padding="3 3 12 12")
-        self.n_class = StringVar()
+        self.n_class = IntVar()
         self.n_repres = StringVar()
         self.k = StringVar()
         self.create = StringVar()
         self.type_ent = StringVar()
         self.centers = list()
+        self.vector = [-1, -1]
 
     def main_frame(self):
         root.title("Reconocimiento de patrones")
-        menubar = Menu(root)
+        menubar = Menu(self.root)
 
         # display the menu
         root.config(menu=menubar)
-        # Classifiers menu
+        # Menu de clasificadores
         classifiers_ = Menu(menubar, tearoff=0)
         classifiers_.add_command(label="Distancia minima", command=self.distan)
         classifiers_.add_command(label="Maxima probabilidad", command=self.proba)
         classifiers_.add_command(label="Distancia Mahalanobis", command=self.maha)
         classifiers_.add_command(label="knn", command=self.knn)
         menubar.add_cascade(label="Clasificadores", menu=classifiers_)
-        menubar.add_command(label="Salir", command=root.quit)
+        # Menu de practicas
+        excercices = Menu(menubar, tearoff=0)
+        excercices.add_command(label="Distancia minima", command=self.distan)
+        excercices.add_command(label="Maxima probabilidad", command=self.proba)
+        excercices.add_command(label="Distancia Mahalanobis", command=self.maha)
+        classifiers_.add_command(label="knn", command=self.knn)
+        menubar.add_cascade(label="Prácticas", menu=excercices)
+        menubar.add_command(label="Proyecto", command=self.project)
+        menubar.add_command(label="Salir", command=self.root.quit)
 
         self.mainframe.grid(column=1, row=0, sticky=(N, W, E, S))
         self.mainframe.columnconfigure(0, weight=1)
         self.mainframe.rowconfigure(0, weight=1)
 
-        param_frame = ttk.Frame(root, padding="3 3 12 12")
+        param_frame = ttk.Frame(self.root, padding="3 3 12 12")
         param_frame.grid(column=0, row=0, sticky=(N, W, E, S))
 
-        ttk.Label(
-            param_frame, text="Parámetros actuales", font=("Helvetica", 16)
-        ).grid(column=1, row=2, sticky=N)
+        ttk.Label(param_frame, text="Parámetros actuales", font=("Helvetica", 16)).grid(column=1, row=2, sticky=N)
         self.n_class_label = ttk.Label(param_frame, text="Número de clases: ")
         self.n_class_label.grid(column=1, row=3, sticky=W)
-        ttk.Label(param_frame, text="Vector: ").grid(column=1, row=4, sticky=W)
-        param_button = ttk.Button(
-            param_frame, text="Cambiar Parámetros", command=self.change_param_frame
-        )
+        self.n_repres_label = ttk.Label(param_frame, text="Número de representantes: ")
+        self.n_repres_label.grid(column=1, row=4, sticky=W)
+        self.vector_label = ttk.Label(param_frame, text="Vector: ")
+        self.vector_label.grid(column=1, row=5, sticky=W)
+        param_button = ttk.Button(param_frame, text="Cambiar Parámetros", command=self.change_param_frame)
         param_button.grid(column=1, row=6, sticky=W)
-        vector_button = ttk.Button(param_frame, text="Elegir vector")
+        vector_button = ttk.Button(param_frame, text="Elegir vector", command=self.get_vector)
         vector_button.grid(column=2, row=6, sticky=W)
 
-        #self.image = Canvas(self.mainframe, width=200, height=150, borderwidth=1, relief=SUNKEN)
-        #self.image.grid(column=0, row=1, sticky=(N, W))
-        ttk.Button(
-            self.mainframe, text="Seleccionar imagen", command=self.provide_img
-        ).grid(column=0, row=0, sticky=E)
+        ttk.Button(self.mainframe, text="Seleccionar imagen", command=self.provide_img).grid(column=0, row=0, sticky=E)
 
         for child in self.mainframe.winfo_children():
             child.grid_configure(padx=2, pady=2)
@@ -104,13 +111,37 @@ class Frames(object):
 
     def save_changes(self, change_frame):
         print self.n_class.get()
-        self.n_class_label.configure(text="Número de clases: "+self.n_class.get())
+        self.n_class_label.configure(text="Número de clases: %s" % self.n_class.get())
+        self.n_repres_label.configure(text="Número de representantes: %s" % self.n_repres.get())
         root.update_idletasks()
         change_frame.destroy()
 
     def select_image(self, image):
         self.provide_img(root, image, self.centers, self.n_class.get())
         #root.update_idletasks()
+
+    def get_coords(self, event):
+        numbers_centers = len(self.centers)
+        print("%s %s" % (numbers_centers, self.n_class.get()))  # ------------------------------------------------------
+        if numbers_centers <= self.n_class.get():
+            self.centers.append(np.matrix(self.prix[event.x, event.y]))
+            self.canvas.create_oval(event.x, event.y, event.x, event.y, outline="red", fill="red", width=2)
+            return
+
+    def get_vector_coords(self, event):
+        print("vector %s" % self.vector)  # ----------------------------------------------------------------------------
+        if self.vector != [-1, -1]:
+            self.canvas.delete(self.vector_draw)
+        self.vector = np.matrix(self.prix[event.x, event.y])
+        self.vector_draw = self.canvas.create_oval(
+            event.x, event.y, event.x, event.y, outline="yellow", fill="yellow", width=2
+        )
+        self.vector_label.configure(text="vector: %s" % self.vector)
+        root.update_idletasks()
+        return
+
+    def get_vector(self):
+        self.canvas.bind("<Button 1>", self.get_vector_coords)
 
     def provide_img(self):
 
@@ -132,54 +163,68 @@ class Frames(object):
         if not File:
             print 'No se Selecciona archivo'
         else:
-            im = Image.open(File)
-            img = ImageTk.PhotoImage(im)
-            prix = im.load()
+            self.im = Image.open(File)
+            img = ImageTk.PhotoImage(self.im)
+            self.prix = self.im.load()
             self.canvas.create_image(0, 0, image=img, anchor="nw")
+            self.canvas.image = img
             self.canvas.config(scrollregion=self.canvas.bbox(ALL))
 
-            def get_coords(event):
-                self.centers.append(np.matrix(prix[event.x, event.y]))
-                #numbers_centers = len(centers)
-                # if numbers_centers == n_classes:
-                # root.destroy()
-                #    return
+            self.canvas.bind("<Button 1>", self.get_coords)
 
-            self.canvas.bind("<Button 1>", get_coords)
+    def create_class(self, c, flag_img, n_classes, n_repr):
+        centers = list()
+        if flag_img == -1:
+            print 'Centros '
+            print self.centers
+            dimention = self.centers[0].shape[1]
+        else:
+            dimention = input("Dimensión de los representantes: ")
+        for i in range(n_classes):
+            print 'Para la clase {} \n'.format(i + 1)
+            dispersal = input("Dispersión: ")
+            if flag_img != -1:
+                center = list(map(int, raw_input("Centro separado por comas: ").split(", ")))
+            else:
+                pass
+                print 'y Centro: {}'.format(self.centers[i])
+            c.append(np.random.rand(dimention, n_repr) * dispersal + np.transpose(self.centers[i]))
 
     def distan(self):
-        distance(c,vector)
-
-    def distance(self, c, vector):
-        pass
+        c = list()
+        self.create_class(c, -1, self.n_class.get(), int(self.n_repres.get()))
+        own = minimum_distance.main(c, self.vector)
+        print ("Pertenece a la clase %s" % own)
 
     def proba(self):
-        #probability(c, vector)
-        pass
-
-    def probability(self, c,vector):
-        pass
+        c = list()
+        self.create_class(c, -1, self.n_class.get(), int(self.n_repres.get()))
+        own = maximum_probability.main(c, self.vector)
+        print ("Pertenece a la clase %s" % own)
 
     def maha(self):
-        #probability(c, vector)
-        pass
-
-    def mahalanobis(self, c,vector):
-        pass
+        c = list()
+        self.create_class(c, -1, self.n_class.get(), int(self.n_repres.get()))
+        own = mahalanobis_distance.main(c, self.vector)
+        print ("Pertenece a la clase %s" % own)
 
     def knn(self):
-        w = Label(root, text="k:", font=("Helvetica", 16))
-        w.pack()
-        #w_text = e.get()
-        kknn(c,vector,k)
+        c = list()
+        self.create_class(c, -1, self.n_class.get(), int(self.n_repres.get()))
+        own = k_nearest_neighbors.main(c, self.vector, int(self.k.get()))
+        print ("Pertenece a la clase %s" % own)
 
-    def kknn(self, c,vector,k):
-        k_nearest_neighbors.main(c, vector, k)
+    def project(self):
+        root = Tk()
+        app = project.Memorama(root)
+        app.main_frame()
+        root.mainloop()
 
 if __name__ == '__main__':
     root = Tk()
-    app = Frames()
-    app.main_frame(root)
+    app = Frames(root)
+    app.main_frame()
     root.mainloop()
+
 
 

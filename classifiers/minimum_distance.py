@@ -17,58 +17,39 @@ def main(
     print N
 
     averages = list()
-    pre_covs_matrix = list()
-    covariances = list()
-    inverses = list()
     vecs_avers = list()
-    mahalannobis = list()
-    exps = list()
-    dets = list()
-    probabilitys = list()
-    figures = list()
+    distances = list()
     cont = 0
 
     for matrix in c:
         cont += 1
         print ("Matriz ")
         print (matrix)
-        # print (matrix[-1][1])
         # Obtener media
         averages.append(np.mean(matrix, axis=1))
         print ("promedio ")
         print (averages)
-        # Covarianza
-        pre_covs_matrix.append(np.matrix(np.array(matrix) - np.transpose(averages)))
-        print ("Covarianza ")
-        print (pre_covs_matrix[-1])
-        covariances.append(pre_covs_matrix[-1] * np.transpose(pre_covs_matrix[-1]) / N )
-        print (covariances[-1])
-        # Inversa
-        inverses.append(np.linalg.inv(covariances[-1]))
-        print ("Inversa ")
-        print (inverses[-1])
-        # Mahalanobis
+
         vecs_avers.append(np.matrix(vector - np.transpose(averages[-1])))
         print ("vector - media %s" % vecs_avers[-1])
-        mahalannobis.append(vecs_avers[-1] * inverses[-1] * np.transpose(vecs_avers[-1]))
-        print ("v-m inv v-m %s" % mahalannobis[-1])
-        # Exponentes
-        exps.append(math.exp(-.5 * mahalannobis[-1]))
-        print ("e -1/2 * maha %s " % exps[-1])
-        # Determinantes
-        dets.append(np.linalg.det(covariances[-1]))
-        print ("determinante %s" % dets[-1])
-        # Resultados
-        probabilitys.append((1/(2*math.pi*np.power(dets[-1], .5))) * exps[-1])
-        print ("prob %s" % probabilitys[-1])
+
+        # Obtener la distancia
+        suma = 0
+        print("jjj")
+        for elto in vecs_avers[-1].A1:
+            suma += elto * elto
+        print ("suma %s" % suma)
+
+        distances.append(np.real(math.sqrt(suma)))
 
         del averages[-1]
 
-    for probability in probabilitys:
-        print (probability)
+    print ("Distancias Mahalanobis")
+    for distance in distances:
+        print (distance)
 
-    max_prob = max(probabilitys)
-    class_num = probabilitys.index(max_prob) + 1
+    min_distance = min(distances)
+    class_num = distances.index(min_distance) + 1
     return class_num
 
 
